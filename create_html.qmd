@@ -1,10 +1,12 @@
 ---
-title: "Create HTML"
+title: "Using Quarto to Create Static HTML"
 format: html
 editor: visual
 ---
 
-## Summary of Built Environment Mapping Tool
+## Key Findings from the Built Environment Data Tool
+
+The Built Environment Indicators and Health Interactive Map Tool originated as an October 2023 Data Science \@ DC Hacktoberfest project. The tool sheds light on the relationship between the built environment and public health outcomes in the District of Columbia; it incorporates 41 data measures categorized into 9 categories utilizing 48 datasets on Open Data DC.
 
 ```{r}
 #| label: load-packages
@@ -61,7 +63,15 @@ dc_wards <- st_read("https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/A
 
 ```
 
-You can add options to executable code like this
+### Overall
+
+Key takeaways from the tool include:
+
+-   Most neighborhoods have high access to **education**, **transportation**, and **financial institution** built environment features, with lower access to playgrounds, modernized schools, and short walks to bus stops
+-   Proximity to vacant or blighted homes, levels of affordable housing, and housing stock quality **varies significantly** across neighborhoods
+-   Access to **food environment** features (grocery stores, farmers markets, and short walks to resturants) and **medical care** (mental health and healthcare facilities) is generally high with lower levels of access in Wards 7 and 8
+-   Although access varies across neighborhoods, **parks, bike trails, and nature trails** are scattered across Wards
+-   Most neighborhoods are not located near **vacant lots** or **high-injury roadways**, but access to **fire stations, police stations, and well-lit sidewalks** is more mixed
 
 ```{r}
 #| label: infographic
@@ -194,8 +204,80 @@ ggplot() +
        subtitle = paste0("Neighborhoods are closer to education, transportation, and financial institution features but have lower levels of access to<br>affordable housing."),
        caption = paste0("**Source:** District of Columbia Built Environment Indicators and Health Interactive Map Tool<br>**Notes:** Black dots represent the average DC neighborhood. For each data measure, color corresponds to the average neighborhood and<br>bars represent the full range of values across neighborhoods."))
 
+```
+
+### Education
+
+-   Most neighborhoods in D.C. are in close proximity to schools, wireless hotspots, recreation centers, and libraries, with more mixed access to playgrounds and to schools that have had full modernizations in the last five years
+-   Neighborhoods generally have low levels of access to school crossing guards and to “Safe Passage areas”—specific areas of the city with attention on improving student safety as they travel to and from school
+-   Neighborhoods whose built environments allow for greatest access to education-related features are concentrated in Wards 1 and 6
+
+```{r}
+#| label: education
+#| echo: false
+#| warning: false
+
+set_urbn_defaults(style = "print")
+
+# ridgeline plot
+finaldata %>%
+  select(m1_1_schools:m1_9_recreation_center) %>%
+  pivot_longer(
+    cols = m1_1_schools:m1_9_recreation_center,
+    names_to = "measure",
+    values_to = "value"
+  ) %>%
+  filter(!is.na(value)) %>%
+  mutate(label = case_when(measure == "m1_1_schools" ~ "Schools (within 15-minute walk)",
+                           measure == "m1_2_quality" ~ "Modernized schools (within 15-minute walk)",
+                           measure == "m1_3_playgrounds" ~ "Playgrounds (within 10-minute walk)",
+                           measure == "m1_4_crossing_guards" ~ "Crossing guards (within 2-minute walk)",
+                           measure == "m1_5_safe_passage" ~ "Safe Passage area",
+                           measure == "m1_6_library" ~ "Libraries (within 15-minute walk)",
+                           measure == "m1_7_wireless_hotspot" ~ "Wireless hotspots (within 15-minute walk)",
+                           measure == "m1_8_broadband" ~ "Broadband internet access",
+                           measure == "m1_9_recreation_center" ~ "Recreation center (within 15-minute walk)")) %>%
+  mutate(label = factor(label, levels = c("Safe Passage area", "Crossing guards (within 2-minute walk)",
+                                          "Modernized schools (within 15-minute walk)", 
+                                          "Broadband internet access",
+                                          "Playgrounds (within 10-minute walk)",
+                                          "Libraries (within 15-minute walk)",
+                                          "Recreation center (within 15-minute walk)",
+                                          "Wireless hotspots (within 15-minute walk)",
+                                          "Schools (within 15-minute walk)"))) %>%
+  ggplot(mapping = aes(x = value, y = label, fill = stat(x))) + 
+  geom_density_ridges_gradient(scale = 3, size = 0.3) + 
+  scale_fill_gradientn() + 
+  labs(x = "Share of neighborhood with given built environment characteristic",
+       y = NULL) + 
+  scale_x_continuous(labels = scales::percent,
+                     limits = c(-0.1, 1.1),
+                     breaks = 0:5 * 0.2) +
+  theme(legend.position = "none") +
+  ggtitle("Distribution of Education Data Measures Across DC Neighborhoods") 
+
+
+# map
+set_urbn_defaults(style = "map")
+
+dc_tracts %>%
+  full_join(finaldata, by = c("GEOID")) %>%
+  ggplot() + 
+  geom_sf(aes(fill = d1_scale)) + 
+  scale_fill_gradientn(
+    #labels = scales::percent_format(),
+    name = "Percentiles",
+    breaks=c(0,0.25,0.5,0.75,1),
+    labels = c("Lower", "", "Middle", "",  "Higher"),
+    limits=c(0,1),
+    na.value = "#d2d2d2"
+  ) + 
+  geom_sf(data = dc_wards, color = "white", fill = "transparent", linewidth = 1) +
+  theme(legend.direction = "vertical", legend.box = "vertical",
+        plot.caption = element_markdown(hjust = 0, size = 9),
+        legend.title = element_text(face = "bold", size = 10)) +
+  ggtitle("Overall Education Driver Score") + 
+  labs(caption = paste("**Note:**", "This driver is a weighted average of the nine education built environment features"))
 
 
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
