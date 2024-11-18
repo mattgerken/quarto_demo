@@ -1,0 +1,101 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "--- \n",
+        "title: \"Development Indicators by Continent\"\n",
+        "author: \"Gapminder Analytics Group\"\n",
+        "format: dashboard\n",
+        "--- "
+      ],
+      "id": "ed238412"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import plotly.express as px\n",
+        "df = px.data.gapminder()"
+      ],
+      "id": "f104f183",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Row {height=60%}\n"
+      ],
+      "id": "84c07009"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "title": "GDP and Life Expectancy"
+      },
+      "source": [
+        "px.scatter(  \n",
+        "  df, x=\"gdpPercap\", y=\"lifeExp\", \n",
+        "  animation_frame=\"year\", animation_group=\"country\", \n",
+        "  size=\"pop\", color=\"continent\", hover_name=\"country\",\n",
+        "  facet_col=\"continent\", log_x=True, size_max=45, \n",
+        "  range_x=[100,100000], range_y=[25,90] \n",
+        ")  "
+      ],
+      "id": "1e890ef5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Row {height=40%}\n"
+      ],
+      "id": "245be33e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "title": "Population"
+      },
+      "source": [
+        "px.area(\n",
+        "  df, x=\"year\", y=\"pop\", \n",
+        "  color=\"continent\", line_group=\"country\"\n",
+        ")"
+      ],
+      "id": "8c68470b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "title": "Life Expectancy"
+      },
+      "source": [
+        "px.line(\n",
+        "  df, x=\"year\", y=\"lifeExp\", \n",
+        "  color=\"continent\", line_group=\"country\"\n",
+        ")"
+      ],
+      "id": "55886056",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\matthew.gerken\\AppData\\Local\\Programs\\Python\\Python313\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
