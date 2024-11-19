@@ -17,29 +17,72 @@ df = px.data.gapminder()
 
 ```{python}
 #| title: GDP and Life Expectancy 
-px.scatter(  
+fig = px.scatter(  
   df, x="gdpPercap", y="lifeExp", 
   animation_frame="year", animation_group="country", 
   size="pop", color="continent", hover_name="country",
   facet_col="continent", log_x=True, size_max=45, 
   range_x=[100,100000], range_y=[25,90] 
 )  
+
+fig.update_layout(
+  legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="center",
+    x=0.5, 
+    title_text='',
+    tracegroupgap=20,
+    itemwidth=75,
+    entrywidth=50
+    )
+)
+
 ```
 
 ## Row {height=40%}
 
 ```{python}
 #| title: Population
-px.area(
+fig2 = px.area(
   df, x="year", y="pop", 
   color="continent", line_group="country"
+)
+
+fig2.update_layout(
+  legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="center",
+    x=0.5, 
+    title_text='',
+    tracegroupgap=20,
+    itemwidth=75,
+    entrywidth=50
+    )
 )
 ```
 
 ```{python}
 #| title: Life Expectancy
-px.line(
+fig3 = px.line(
   df, x="year", y="lifeExp", 
   color="continent", line_group="country"
+)
+
+fig3.update_layout(
+  legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="center",
+    x=0.5, 
+    title_text='',
+    tracegroupgap=20,
+    itemwidth=75,
+    entrywidth=50
+    )
 )
 ```
